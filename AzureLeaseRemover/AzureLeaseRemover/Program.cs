@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AzureLeaseRemover
@@ -19,11 +20,9 @@ namespace AzureLeaseRemover
 
             Uri blobUrl;
 
-            if (Uri.TryCreate(Console.ReadLine(), UriKind.Absolute, out blobUrl))
-            {
-                WriteError("The supplied blob URL is not a valid URI.");
-                return;
-            }
+            var url = Console.ReadLine();
+
+            blobUrl = new Uri(url,UriKind.Absolute);
 
             Console.WriteLine("Please specify a storage account name");
 
@@ -67,6 +66,9 @@ namespace AzureLeaseRemover
             {
                 WriteError(string.Format("Error breaking the lease: {0}.", ex.Message));
             }
+            
+            //Reload blob reference
+            blob = blobClient.GetBlobReferenceFromServer(blobUrl);
 
             Console.WriteLine("Inspecting the blob's lease status...");
             Console.WriteLine("Current lease status: {0}", blob.Properties.LeaseStatus);
